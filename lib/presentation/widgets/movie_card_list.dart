@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ditonton/common/constants.dart';
 import 'package:ditonton/domain/entities/movie.dart';
+import 'package:ditonton/presentation/bloc/watchlist_movie/watchlist_movie_bloc.dart';
 import 'package:ditonton/presentation/pages/movie_detail_page.dart';
-import 'package:ditonton/presentation/provider/watchlist_movie_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MovieCard extends StatelessWidget {
   final Movie movie;
@@ -18,16 +18,16 @@ class MovieCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
         onTap: () async {
-         await Navigator.pushNamed(
+          await Navigator.pushNamed(
             context,
             MovieDetailPage.ROUTE_NAME,
             arguments: movie.id,
           );
 
-         if (isFromWatchList) {
-           Provider.of<WatchlistMovieNotifier>(context, listen: false)
-               .fetchWatchlistMovies();
-         }
+          if (isFromWatchList) {
+            BlocProvider.of<WatchlistMovieBloc>(context)
+                .add(LoadWatchlistMovieEvent());
+          }
         },
         child: Stack(
           alignment: Alignment.bottomLeft,

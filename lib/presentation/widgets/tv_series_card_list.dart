@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ditonton/common/constants.dart';
 import 'package:ditonton/domain/entities/tv_series.dart';
+import 'package:ditonton/presentation/bloc/watchlist_tv_series/watchlist_tv_series_bloc.dart';
 import 'package:ditonton/presentation/pages/movie_detail_page.dart';
 import 'package:ditonton/presentation/pages/tv_series_detail_page.dart';
 import 'package:ditonton/presentation/provider/watchlist_tv_series_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class TVSeriesCard extends StatelessWidget {
@@ -26,8 +28,8 @@ class TVSeriesCard extends StatelessWidget {
           );
 
           if (isFromWatchList) {
-            Provider.of<WatchlistTVSeriesNotifier>(context, listen: false)
-                .fetchWatchlist();
+            BlocProvider.of<WatchlistTVSeriesBloc>(context)
+                .add(LoadWatchlistTVSeriesEvent());
           }
         },
         child: Stack(

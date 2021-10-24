@@ -1,9 +1,14 @@
+import 'package:ditonton/injection.dart';
+import 'package:ditonton/presentation/bloc/watchlist_movie/watchlist_movie_bloc.dart';
+import 'package:ditonton/presentation/bloc/watchlist_tv_series/watchlist_tv_series_bloc.dart';
 import 'package:ditonton/presentation/pages/watchlist_movies_page.dart';
 import 'package:ditonton/presentation/pages/watchlist_tv_series_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WatchlistPage extends StatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
+
   const WatchlistPage(this.scaffoldKey);
 
   @override
@@ -43,8 +48,15 @@ class _WatchlistPageState extends State<WatchlistPage> {
         body: TabBarView(
           physics: NeverScrollableScrollPhysics(),
           children: [
-            WatchlistMoviesPage(),
-            WatchlistTVSeriesPage(),
+            BlocProvider(
+              create: (context) => WatchlistMovieBloc(getWatchlistMovies: locator()),
+              child: WatchlistMoviesPage(),
+            ),
+            BlocProvider(
+              create: (context) =>
+                  WatchlistTVSeriesBloc(getWatchlistTVSeries: locator()),
+              child: WatchlistTVSeriesPage(),
+            ),
           ],
         ),
       ),
