@@ -1,24 +1,12 @@
-import 'package:ditonton/common/state_enum.dart';
-import 'package:ditonton/presentation/provider/top_rated_tv_series_notifier.dart';
+import 'package:ditonton/injection.dart';
+import 'package:ditonton/presentation/bloc/top_rated_tv_series/top_rated_tv_series_bloc.dart';
 import 'package:ditonton/presentation/widgets/tv_series_card_list.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TopRatedTVSeriesPage extends StatefulWidget {
+class TopRatedTVSeriesPage extends StatelessWidget {
   static const ROUTE_NAME = '/top-rated-tv-series';
-
-  @override
-  _TopRatedTVSeriesPageState createState() => _TopRatedTVSeriesPageState();
-}
-
-class _TopRatedTVSeriesPageState extends State<TopRatedTVSeriesPage> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() =>
-        Provider.of<TopRatedTVSeriesNotifier>(context, listen: false)
-            .fetchTopRated());
-  }
+  final TopRatedTVSeriesBloc topRatedTVSeriesBloc = locator();
 
   @override
   Widget build(BuildContext context) {
@@ -26,30 +14,69 @@ class _TopRatedTVSeriesPageState extends State<TopRatedTVSeriesPage> {
       appBar: AppBar(
         title: Text('Top Rated TV Series'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Consumer<TopRatedTVSeriesNotifier>(
-          builder: (context, data, child) {
-            if (data.state == RequestState.Loading) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (data.state == RequestState.Loaded) {
-              return ListView.builder(
-                itemBuilder: (context, index) {
-                  final tvSeries = data.tvSeries[index];
-                  return TVSeriesCard(tvSeries);
-                },
-                itemCount: data.tvSeries.length,
-              );
-            } else {
-              return Center(
-                key: Key('error_message'),
-                child: Text(data.message),
-              );
-            }
-          },
-        ),
+      body: BlocProvider(
+        create: (context) => topRatedTVSeriesBloc,
+        child: TopRatedTVSeriesList(),
+      ),
+    );
+  }
+}
+
+class TopRatedTVSeriesList extends StatefulWidget {
+  const TopRatedTVSeriesList({Key? key}) : super(key: key);
+
+  @override
+  _TopRatedTVSeriesListState createState() => _TopRatedTVSeriesListState();
+}
+
+class _TopRatedTVSeriesListState extends State<TopRatedTVSeriesList> {
+  late TopRatedTVSeriesBloc topRatedTVSeriesBloc;
+
+  @override
+  void initState() {
+    topRatedTVSeriesBloc = BlocProvider.of<TopRatedTVSeriesBloc>(context);
+    topRatedTVSeriesBloc.add(LoadTopRatedTVSeriesEvent());
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: BlocBuilder(
+        bloc: topRatedTVSeriesBloc,
+        builder: (context, state) {
+          if (state is TopRatedTVSeriesInitial) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (state is TopRatedTVSeriesLoadedState &&
+              topRatedTVSeriesBloc.topRatedList.isNotEmpty) {
+            return ListView.builder(
+              itemBuilder: (context, index) {
+                final tvSeries = topRatedTVSeriesBloc.topRatedList[index];
+                return TVSeriesCard(
+                  tvSeries,
+                );
+              },
+              itemCount: topRatedTVSeriesBloc.topRatedList.length,
+            );
+          } else if (state is TopRatedTVSeriesLoadedState &&
+              topRatedTVSeriesBloc.topRatedList.isEmpty) {
+            return Center(
+              key: Key('empty_message'),
+              child: Text("Top rated tv series is empty"),
+            );
+          } else {
+            String message = state is LoadTopRatedTVSeriesFailureState
+                ? state.message
+                : "Error";
+            return Center(
+              key: Key('error_message'),
+              child: Text(message),
+            );
+          }
+        },
       ),
     );
   }

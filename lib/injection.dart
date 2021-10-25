@@ -27,6 +27,8 @@ import 'package:ditonton/domain/usecases/save_watchlist.dart';
 import 'package:ditonton/domain/usecases/save_watchlist_tv_series.dart';
 import 'package:ditonton/domain/usecases/search_movies.dart';
 import 'package:ditonton/domain/usecases/search_tv_series.dart';
+import 'package:ditonton/presentation/bloc/top_rated_movie/top_rated_movie_bloc.dart';
+import 'package:ditonton/presentation/bloc/top_rated_tv_series/top_rated_tv_series_bloc.dart';
 import 'package:ditonton/presentation/provider/movie_detail_notifier.dart';
 import 'package:ditonton/presentation/provider/movie_list_notifier.dart';
 import 'package:ditonton/presentation/provider/movie_search_notifier.dart';
@@ -40,8 +42,8 @@ import 'package:ditonton/presentation/provider/tv_series_list_notifier.dart';
 import 'package:ditonton/presentation/provider/tv_series_search_notifier.dart';
 import 'package:ditonton/presentation/provider/watchlist_movie_notifier.dart';
 import 'package:ditonton/presentation/provider/watchlist_tv_series_notifier.dart';
-import 'package:http/http.dart' as http;
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
 
 final locator = GetIt.instance;
 
@@ -71,7 +73,7 @@ void init() {
     ),
   );
   locator.registerFactory(
-        () => TVSeriesDetailNotifier(
+    () => TVSeriesDetailNotifier(
       getTVSeriesDetail: locator(),
       getTVSeriesRecommendations: locator(),
       getWatchListStatusTVSeries: locator(),
@@ -95,7 +97,7 @@ void init() {
     ),
   );
   locator.registerFactory(
-        () => PopularTVSeriesNotifier(
+    () => PopularTVSeriesNotifier(
       getPopularTVSeries: locator(),
     ),
   );
@@ -105,7 +107,7 @@ void init() {
     ),
   );
   locator.registerFactory(
-        () => TopRatedTVSeriesNotifier(
+    () => TopRatedTVSeriesNotifier(
       getTopRatedTVSeries: locator(),
     ),
   );
@@ -115,12 +117,12 @@ void init() {
     ),
   );
   locator.registerFactory(
-        () => WatchlistTVSeriesNotifier(
+    () => WatchlistTVSeriesNotifier(
       getWatchlistTVSeries: locator(),
     ),
   );
   locator.registerFactory(
-        () => NowPlayingTVSeriesNotifier(
+    () => NowPlayingTVSeriesNotifier(
       getNowPlayingTVSeries: locator(),
     ),
   );
@@ -178,4 +180,10 @@ void init() {
 
   // external
   locator.registerLazySingleton(() => http.Client());
+
+  // BLOC
+  locator
+      .registerFactory(() => TopRatedMovieBloc(getTopRatedMovies: locator()));
+  locator.registerFactory(
+      () => TopRatedTVSeriesBloc(getTopRatedTVSeries: locator()));
 }
