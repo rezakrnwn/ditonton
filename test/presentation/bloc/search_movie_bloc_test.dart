@@ -22,7 +22,7 @@ void main() {
   });
 
   blocTest<SearchMovieBloc, SearchMovieState>(
-      'should emit [SearchMovieInitial, SearchResultMovieLoadedState] when data is gotten successfully',
+      'should emit [SearchMovieLoadingState, SearchResultMovieLoadedState] when data is gotten successfully',
       build: () {
         when(mockSearchMovies.execute(keyword))
             .thenAnswer((_) async => Right([testWatchlistMovie]));
@@ -30,7 +30,7 @@ void main() {
       },
       act: (bloc) => bloc.add(LoadSearchResultMovieEvent(keyword: keyword)),
       expect: () => [
-            SearchMovieInitial(),
+            SearchMovieLoadingState(),
             SearchResultMovieLoadedState(),
           ],
       verify: (bloc) {
@@ -38,7 +38,7 @@ void main() {
       });
 
   blocTest<SearchMovieBloc, SearchMovieState>(
-      "should emit [SearchMovieInitial, LoadSearchMovieFailureState] when get data is unsuccessful",
+      "should emit [SearchMovieLoadingState, LoadSearchMovieFailureState] when get data is unsuccessful",
       build: () {
         when(mockSearchMovies.execute(keyword))
             .thenAnswer((_) async => Left(ServerFailure('Server Failure')));
@@ -46,7 +46,7 @@ void main() {
       },
       act: (bloc) => bloc.add(LoadSearchResultMovieEvent(keyword: keyword)),
       expect: () => [
-            SearchMovieInitial(),
+            SearchMovieLoadingState(),
             LoadSearchMovieFailureState(message: 'Server Failure'),
           ],
       verify: (bloc) {

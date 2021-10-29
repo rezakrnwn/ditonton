@@ -22,7 +22,7 @@ void main() {
   });
 
   blocTest<SearchTVSeriesBloc, SearchTVSeriesState>(
-      "should emit [SearchTVSeriesInitial, SearchResultTVSeriesLoadedState] when data is gotten successfully",
+      "should emit [SearchTVSeriesLoadingState, SearchResultTVSeriesLoadedState] when data is gotten successfully",
       build: () {
         when(mockSearchTVSeries.execute(keyword))
             .thenAnswer((_) async => Right([testWatchlistTVSeries]));
@@ -30,7 +30,7 @@ void main() {
       },
       act: (bloc) => bloc.add(LoadSearchResultTVSeriesEvent(keyword: keyword)),
       expect: () => [
-            SearchTVSeriesInitial(),
+            SearchTVSeriesLoadingState(),
             SearchResultTVSeriesLoadedState(),
           ],
       verify: (bloc) {
@@ -38,7 +38,7 @@ void main() {
       });
 
   blocTest<SearchTVSeriesBloc, SearchTVSeriesState>(
-      "should emit [SearchTVSeriesInitial, LoadSearchTVSeriesFailureState] when get data is unsuccessful",
+      "should emit [SearchTVSeriesLoadingState, LoadSearchTVSeriesFailureState] when get data is unsuccessful",
       build: () {
         when(mockSearchTVSeries.execute(keyword)).thenAnswer(
             (realInvocation) async => Left(ServerFailure("Server Failure")));
@@ -46,7 +46,7 @@ void main() {
       },
       act: (bloc) => bloc.add(LoadSearchResultTVSeriesEvent(keyword: keyword)),
       expect: () => [
-            SearchTVSeriesInitial(),
+            SearchTVSeriesLoadingState(),
             LoadSearchTVSeriesFailureState(message: "Server Failure"),
           ],
       verify: (bloc) {
