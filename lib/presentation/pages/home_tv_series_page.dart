@@ -4,7 +4,6 @@ import 'package:ditonton/common/state_enum.dart';
 import 'package:ditonton/domain/entities/tv_series.dart';
 import 'package:ditonton/presentation/pages/now_playing_tv_series_page.dart';
 import 'package:ditonton/presentation/pages/popular_tv_series_page.dart';
-import 'package:ditonton/presentation/pages/search_page.dart';
 import 'package:ditonton/presentation/pages/search_tv_series_page.dart';
 import 'package:ditonton/presentation/pages/top_rated_tv_series_page.dart';
 import 'package:ditonton/presentation/pages/tv_series_detail_page.dart';
@@ -22,12 +21,11 @@ class HomeTVSeriesPage extends StatefulWidget {
 }
 
 class _HomeTVSeriesPageState extends State<HomeTVSeriesPage> {
-
   @override
   void initState() {
     super.initState();
     Future.microtask(
-            () => Provider.of<TVSeriesListNotifier>(context, listen: false)
+        () => Provider.of<TVSeriesListNotifier>(context, listen: false)
           ..fetchNowPlaying()
           ..fetchPopular()
           ..fetchTopRated());
@@ -59,7 +57,8 @@ class _HomeTVSeriesPageState extends State<HomeTVSeriesPage> {
             children: [
               _buildSubHeading(
                 title: 'Now Playing',
-                onTap: () => Navigator.pushNamed(context, NowPlayingTVSeriesPage.ROUTE_NAME),
+                onTap: () => Navigator.pushNamed(
+                    context, NowPlayingTVSeriesPage.ROUTE_NAME),
               ),
               Consumer<TVSeriesListNotifier>(builder: (context, data, child) {
                 final state = data.nowPlayingState;
@@ -75,7 +74,8 @@ class _HomeTVSeriesPageState extends State<HomeTVSeriesPage> {
               }),
               _buildSubHeading(
                 title: 'Popular',
-                onTap: () => Navigator.pushNamed(context, PopularTVSeriesPage.ROUTE_NAME),
+                onTap: () => Navigator.pushNamed(
+                    context, PopularTVSeriesPage.ROUTE_NAME),
               ),
               Consumer<TVSeriesListNotifier>(builder: (context, data, child) {
                 final state = data.popularState;
@@ -91,7 +91,8 @@ class _HomeTVSeriesPageState extends State<HomeTVSeriesPage> {
               }),
               _buildSubHeading(
                 title: 'Top Rated',
-                onTap: () => Navigator.pushNamed(context, TopRatedTVSeriesPage.ROUTE_NAME),
+                onTap: () => Navigator.pushNamed(
+                    context, TopRatedTVSeriesPage.ROUTE_NAME),
               ),
               Consumer<TVSeriesListNotifier>(builder: (context, data, child) {
                 final state = data.topRatedState;
@@ -150,7 +151,9 @@ class TVSeriesList extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.all(8),
             child: InkWell(
-              onTap: () => Navigator.pushNamed(context, TVSeriesDetailPage.ROUTE_NAME, arguments: tvSeries.id),
+              onTap: () => Navigator.pushNamed(
+                  context, TVSeriesDetailPage.ROUTE_NAME,
+                  arguments: tvSeries.id),
               child: ClipRRect(
                 borderRadius: BorderRadius.all(Radius.circular(16)),
                 child: CachedNetworkImage(
