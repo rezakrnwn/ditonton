@@ -1,45 +1,27 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ditonton/common/constants.dart';
-import 'package:ditonton/common/state_enum.dart';
 import 'package:ditonton/domain/entities/tv_series.dart';
+import 'package:ditonton/injection.dart';
+import 'package:ditonton/presentation/bloc/home_tv_series/home_tv_series_bloc.dart';
 import 'package:ditonton/presentation/pages/now_playing_tv_series_page.dart';
 import 'package:ditonton/presentation/pages/popular_tv_series_page.dart';
 import 'package:ditonton/presentation/pages/search_tv_series_page.dart';
 import 'package:ditonton/presentation/pages/top_rated_tv_series_page.dart';
 import 'package:ditonton/presentation/pages/tv_series_detail_page.dart';
-import 'package:ditonton/presentation/provider/tv_series_list_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomeTVSeriesPage extends StatefulWidget {
-  final GlobalKey<ScaffoldState> scaffoldKey;
+class HomeTVSeriesPage extends StatelessWidget {
+  final GlobalKey<ScaffoldState> globalKey;
+  final HomeTVSeriesBloc homeTVSeriesBloc = locator();
 
-  const HomeTVSeriesPage(this.scaffoldKey);
-
-  @override
-  _HomeTVSeriesPageState createState() => _HomeTVSeriesPageState();
-}
-
-class _HomeTVSeriesPageState extends State<HomeTVSeriesPage> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(
-        () => Provider.of<TVSeriesListNotifier>(context, listen: false)
-          ..fetchNowPlaying()
-          ..fetchPopular()
-          ..fetchTopRated());
-  }
+  HomeTVSeriesPage(this.globalKey);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Ditonton - TV Series"),
-        leading: IconButton(
-          icon: Icon(Icons.dehaze),
-          onPressed: () => widget.scaffoldKey.currentState?.openDrawer(),
-        ),
+        title: Text('Ditonton - TV Series'),
         actions: [
           IconButton(
             onPressed: () {
@@ -48,67 +30,79 @@ class _HomeTVSeriesPageState extends State<HomeTVSeriesPage> {
             icon: Icon(Icons.search),
           )
         ],
+        leading: IconButton(
+            color: Colors.white,
+            icon: Icon(Icons.dehaze),
+            onPressed: () {
+              globalKey.currentState?.openDrawer();
+            }),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSubHeading(
-                title: 'Now Playing',
-                onTap: () => Navigator.pushNamed(
-                    context, NowPlayingTVSeriesPage.ROUTE_NAME),
+      body: BlocProvider(
+        create: (context) => homeTVSeriesBloc,
+        child: HomeTVSeriesContentSection(),
+      ),
+    );
+  }
+}
+
+class HomeTVSeriesContentSection extends StatefulWidget {
+  const HomeTVSeriesContentSection({Key? key}) : super(key: key);
+
+  @override
+  _HomeTVSeriesContentSectionState createState() =>
+      _HomeTVSeriesContentSectionState();
+}
+
+class _HomeTVSeriesContentSectionState
+    extends State<HomeTVSeriesContentSection> {
+  late HomeTVSeriesBloc homeTVSeriesBloc;
+
+  @override
+  void initState() {
+    homeTVSeriesBloc = BlocProvider.of<HomeTVSeriesBloc>(context);
+    homeTVSeriesBloc.add(LoadHomeTVSeriesEvent());
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8),
+      child: BlocBuilder(
+        bloc: homeTVSeriesBloc,
+        builder: (context, state) {
+          if (state is HomeTVSeriesInitial) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSubHeading(
+                    title: 'Now Playing',
+                    onTap: () => Navigator.pushNamed(
+                        context, NowPlayingTVSeriesPage.ROUTE_NAME),
+                  ),
+                  TVSeriesList(homeTVSeriesBloc.nowPlaying),
+                  _buildSubHeading(
+                    title: 'Popular',
+                    onTap: () => Navigator.pushNamed(
+                        context, PopularTVSeriesPage.ROUTE_NAME),
+                  ),
+                  TVSeriesList(homeTVSeriesBloc.popular),
+                  _buildSubHeading(
+                    title: 'Top Rated',
+                    onTap: () => Navigator.pushNamed(
+                        context, TopRatedTVSeriesPage.ROUTE_NAME),
+                  ),
+                  TVSeriesList(homeTVSeriesBloc.topRated),
+                ],
               ),
-              Consumer<TVSeriesListNotifier>(builder: (context, data, child) {
-                final state = data.nowPlayingState;
-                if (state == RequestState.Loading) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (state == RequestState.Loaded) {
-                  return TVSeriesList(data.nowPlaying);
-                } else {
-                  return Text('Failed');
-                }
-              }),
-              _buildSubHeading(
-                title: 'Popular',
-                onTap: () => Navigator.pushNamed(
-                    context, PopularTVSeriesPage.ROUTE_NAME),
-              ),
-              Consumer<TVSeriesListNotifier>(builder: (context, data, child) {
-                final state = data.popularState;
-                if (state == RequestState.Loading) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (state == RequestState.Loaded) {
-                  return TVSeriesList(data.popular);
-                } else {
-                  return Text('Failed');
-                }
-              }),
-              _buildSubHeading(
-                title: 'Top Rated',
-                onTap: () => Navigator.pushNamed(
-                    context, TopRatedTVSeriesPage.ROUTE_NAME),
-              ),
-              Consumer<TVSeriesListNotifier>(builder: (context, data, child) {
-                final state = data.topRatedState;
-                if (state == RequestState.Loading) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (state == RequestState.Loaded) {
-                  return TVSeriesList(data.topRated);
-                } else {
-                  return Text('Failed');
-                }
-              }),
-            ],
-          ),
-        ),
+            );
+          }
+        },
       ),
     );
   }
