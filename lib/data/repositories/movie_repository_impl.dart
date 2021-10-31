@@ -1,14 +1,16 @@
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:ditonton/common/exception.dart';
+import 'package:ditonton/common/failure.dart';
 import 'package:ditonton/data/datasources/movie_local_data_source.dart';
 import 'package:ditonton/data/datasources/movie_remote_data_source.dart';
 import 'package:ditonton/data/models/movie_table.dart';
 import 'package:ditonton/domain/entities/movie.dart';
 import 'package:ditonton/domain/entities/movie_detail.dart';
 import 'package:ditonton/domain/repositories/movie_repository.dart';
-import 'package:ditonton/common/exception.dart';
-import 'package:ditonton/common/failure.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 
 class MovieRepositoryImpl implements MovieRepository {
   final MovieRemoteDataSource remoteDataSource;
@@ -24,9 +26,15 @@ class MovieRepositoryImpl implements MovieRepository {
     try {
       final result = await remoteDataSource.getNowPlayingMovies();
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -36,9 +44,15 @@ class MovieRepositoryImpl implements MovieRepository {
     try {
       final result = await remoteDataSource.getMovieDetail(id);
       return Right(result.toEntity());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -48,9 +62,15 @@ class MovieRepositoryImpl implements MovieRepository {
     try {
       final result = await remoteDataSource.getMovieRecommendations(id);
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -60,9 +80,15 @@ class MovieRepositoryImpl implements MovieRepository {
     try {
       final result = await remoteDataSource.getPopularMovies();
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -72,9 +98,15 @@ class MovieRepositoryImpl implements MovieRepository {
     try {
       final result = await remoteDataSource.getTopRatedMovies();
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -84,9 +116,15 @@ class MovieRepositoryImpl implements MovieRepository {
     try {
       final result = await remoteDataSource.searchMovies(query);
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -97,9 +135,15 @@ class MovieRepositoryImpl implements MovieRepository {
       final result =
           await localDataSource.insertWatchlist(MovieTable.fromEntity(movie));
       return Right(result);
-    } on DatabaseException catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(DatabaseFailure(e.message));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       throw e;
     }
   }
@@ -110,7 +154,10 @@ class MovieRepositoryImpl implements MovieRepository {
       final result =
           await localDataSource.removeWatchlist(MovieTable.fromEntity(movie));
       return Right(result);
-    } on DatabaseException catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(DatabaseFailure(e.message));
     }
   }

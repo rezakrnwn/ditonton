@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:ditonton/common/exception.dart';
 import 'package:ditonton/common/failure.dart';
 import 'package:ditonton/data/datasources/tv_series_local_data_source.dart';
 import 'package:ditonton/data/datasources/tv_series_remote_data_source.dart';
@@ -9,8 +11,8 @@ import 'package:ditonton/data/models/tv_series_table.dart';
 import 'package:ditonton/domain/entities/tv_series.dart';
 import 'package:ditonton/domain/entities/tv_series_detail.dart';
 import 'package:ditonton/domain/repositories/tv_series_repository.dart';
-import 'package:ditonton/common/exception.dart';
-import 'package:ditonton/common/failure.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 
 class TVSeriesRepositoryImpl implements TVSeriesRepository {
   final TVSeriesRemoteDataSource _tvSeriesRemoteDataSource;
@@ -28,9 +30,15 @@ class TVSeriesRepositoryImpl implements TVSeriesRepository {
       final List<TVSeriesModel> result =
           await _tvSeriesRemoteDataSource.getNowPlaying();
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -40,9 +48,15 @@ class TVSeriesRepositoryImpl implements TVSeriesRepository {
     try {
       final result = await _tvSeriesRemoteDataSource.getDetail(id);
       return Right(result.toEntity());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -52,9 +66,15 @@ class TVSeriesRepositoryImpl implements TVSeriesRepository {
     try {
       final result = await _tvSeriesRemoteDataSource.getPopular();
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -64,9 +84,15 @@ class TVSeriesRepositoryImpl implements TVSeriesRepository {
     try {
       final result = await _tvSeriesRemoteDataSource.getRecommendations(id);
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -76,9 +102,15 @@ class TVSeriesRepositoryImpl implements TVSeriesRepository {
     try {
       final result = await _tvSeriesRemoteDataSource.getTopRated();
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
@@ -101,7 +133,10 @@ class TVSeriesRepositoryImpl implements TVSeriesRepository {
       final result =
           await _tvSeriesLocalDataSource.removeWatchlist(TVSeriesTable.fromEntity(tvSeries));
       return Right(result);
-    } on DatabaseException catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(DatabaseFailure(e.message));
     }
   }
@@ -112,9 +147,15 @@ class TVSeriesRepositoryImpl implements TVSeriesRepository {
       final result =
           await _tvSeriesLocalDataSource.insertWatchlist(TVSeriesTable.fromEntity(tvSeries));
       return Right(result);
-    } on DatabaseException catch (e) {
+    } on DatabaseException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(DatabaseFailure(e.message));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       throw e;
     }
   }
@@ -124,9 +165,15 @@ class TVSeriesRepositoryImpl implements TVSeriesRepository {
     try {
       final result = await _tvSeriesRemoteDataSource.search(query);
       return Right(result.map((model) => model.toEntity()).toList());
-    } on ServerException {
+    } on ServerException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ServerFailure(''));
-    } on SocketException {
+    } on SocketException catch (e, stackTrace) {
+      if (!kDebugMode) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace);
+      }
       return Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
