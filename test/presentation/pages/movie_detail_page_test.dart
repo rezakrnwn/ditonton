@@ -8,7 +8,7 @@ void main() {
 
   setUp(() async {
     await GetIt.I.reset();
-    di.init();
+    await di.init();
   });
 
   Widget _makeTestableWidget(Widget body) {

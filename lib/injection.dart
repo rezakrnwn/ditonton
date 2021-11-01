@@ -1,3 +1,4 @@
+import 'package:ditonton/common/ssl_helper.dart';
 import 'package:ditonton/data/datasources/db/database_helper.dart';
 import 'package:ditonton/data/datasources/movie_local_data_source.dart';
 import 'package:ditonton/data/datasources/movie_remote_data_source.dart';
@@ -39,11 +40,13 @@ import 'package:ditonton/presentation/bloc/top_rated_movie/top_rated_movie_bloc.
 import 'package:ditonton/presentation/bloc/top_rated_tv_series/top_rated_tv_series_bloc.dart';
 import 'package:ditonton/presentation/bloc/tv_series_detail/tv_series_detail_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 
 final locator = GetIt.instance;
 
-void init() {
+Future init() async {
+  IOClient ioClient = await SSLHelper.ioClient;
+
   // use case - movie
   locator.registerLazySingleton(() => GetNowPlayingMovies(locator()));
   locator.registerLazySingleton(() => GetPopularMovies(locator()));
@@ -82,21 +85,21 @@ void init() {
     ),
   );
 
-  // data sources
-  locator.registerLazySingleton<MovieRemoteDataSource>(
-      () => MovieRemoteDataSourceImpl(client: locator()));
-  locator.registerLazySingleton<MovieLocalDataSource>(
-      () => MovieLocalDataSourceImpl(databaseHelper: locator()));
-  locator.registerLazySingleton<TVSeriesRemoteDataSource>(
-      () => TVSeriesRemoteDataSourceImpl(client: locator()));
-  locator.registerLazySingleton<TVSeriesLocalDataSource>(
-      () => TVSeriesLocalDataSourceImpl(databaseHelper: locator()));
-
   // helper
   locator.registerLazySingleton<DatabaseHelper>(() => DatabaseHelper());
 
   // external
-  locator.registerLazySingleton(() => http.Client());
+  locator.registerLazySingleton(() => ioClient);
+
+  // data sources
+  locator.registerLazySingleton<MovieRemoteDataSource>(
+      () => MovieRemoteDataSourceImpl(ioClient: locator()));
+  locator.registerLazySingleton<MovieLocalDataSource>(
+      () => MovieLocalDataSourceImpl(databaseHelper: locator()));
+  locator.registerLazySingleton<TVSeriesRemoteDataSource>(
+      () => TVSeriesRemoteDataSourceImpl(ioClient: locator<IOClient>()));
+  locator.registerLazySingleton<TVSeriesLocalDataSource>(
+      () => TVSeriesLocalDataSourceImpl(databaseHelper: locator()));
 
   // BLOC
   locator
